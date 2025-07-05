@@ -6,5 +6,5 @@ app.use(cors());
 
 // OU mieux, spécifier l'origine de ton frontend GitHub Pages
 // app.use(cors({
-//     origin: 'https://tonutilisateur.github.io' // Remplace par l'URL exacte de ton GitHub Pages
+//     origin: 'https://balou201.github.io/Demande-d-acces/' // Remplace par l'URL exacte de ton GitHub Pages
 // }));
