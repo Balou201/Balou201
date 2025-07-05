@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soumettre une Requête</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box; /* Pour inclure le padding dans la largeur */
+            resize: vertical; /* Permet de redimensionner verticalement */
+            min-height: 100px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .message-status {
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+        }
+        .success {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Soumettre une Requête</h1>
+        <form id="requestForm">
+            <label for="message">Votre message :</label>
+            <textarea id="message" name="message" placeholder="Décrivez votre requête ici..." required minlength="10"></textarea>
+            <button type="submit">Envoyer la Requête</button>
+            <div id="statusMessage" class="message-status"></div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('requestForm').addEventListener('submit', async function(event) {
+            event.preventDefault(); // Empêche le rechargement de la page
+
+            const messageInput = document.getElementById('message');
+            const statusMessage = document.getElementById('statusMessage');
+            const messageContent = messageInput.value.trim();
+            const minLength = 10; // Doit correspondre à la logique backend
+
+            statusMessage.textContent = '';
+            statusMessage.classList.remove('error', 'success');
+
+            // Validation front-end (pour une meilleure expérience utilisateur immédiate)
+            if (messageContent.length < minLength) {
+                statusMessage.textContent = `Votre message est trop court. Il doit contenir au moins ${minLength} caractères.`;
+                statusMessage.classList.add('error');
+                return;
+            }
+
+            // Ici, tu pourrais ajouter une vérification des mots interdits côté client si tu veux.
+            // Cependant, la vérification côté serveur est CRUCIALE car le client peut être manipulé.
+
+            try {
+                const response = await fetch('/submit-request', { // L'URL de ton endpoint backend
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: messageContent })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    statusMessage.textContent = data.message;
+                    statusMessage.classList.add('success');
+                    messageInput.value = ''; // Efface le champ après succès
+                } else {
+                    statusMessage.textContent = data.message || "Une erreur est survenue lors de l'envoi de votre requête.";
+                    statusMessage.classList.add('error');
+                }
+            } catch (error) {
+                console.error('Erreur réseau ou du serveur:', error);
+                statusMessage.textContent = "Impossible de contacter le serveur. Veuillez réessayer plus tard.";
+                statusMessage.classList.add('error');
+            }
+        });
+    </script>
+</body>
+</html>
